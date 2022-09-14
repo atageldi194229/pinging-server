@@ -1,7 +1,7 @@
 const axios = require("axios");
 
 const INTERVAL = 2 * 60 * 1000;
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN.replace(/\r?\n|\r/g, " ");
 const GITHUB_USERNAME = "atageldi194229";
 const GITHUB_REPO = "pinging-server";
 const WORKFLOW_ID = 34892269;
@@ -13,7 +13,7 @@ const run = () => {
       { ref: "main" },
       {
         headers: {
-          Authorization: "Bearer: " + GITHUB_TOKEN,
+          Authorization: "Bearer " + GITHUB_TOKEN,
         },
       }
     )
