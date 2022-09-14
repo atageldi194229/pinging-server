@@ -17,6 +17,7 @@ const run = () => {
         },
       }
     )
+    .then((res) => console.log("Response status code:", res.status))
     .catch(console.error);
 };
 
