@@ -1,6 +1,6 @@
 const axios = require("axios");
 
-const INTERVAL = 2 * 1000;
+const INTERVAL = 2 * 60 * 1000;
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const GITHUB_USERNAME = "atageldi194229";
 const GITHUB_REPO = "pinging-server";
