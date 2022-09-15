@@ -35,8 +35,8 @@ jobs:
   ##################################
   ### Run recursively ###
   ##################################
-  restart_when_failed:
-    name: Restarts the scheduled run after time
+  restart_when_recursivly:
+    name: Restarts the scheduled after a time
     runs-on: ubuntu-latest
     # if: github.event_name == 'schedule' && failure()  # Run when a schedule failed
     needs: [build]
