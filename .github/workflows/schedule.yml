@@ -1,13 +1,12 @@
 on:
   repository_dispatch:
   workflow_dispatch:
-  schedule:
-    - cron: '*/5 * * * *'
+  # schedule:
+  #   - cron: '*/5 * * * *'
 jobs:
   build:
-
+    name: Fetch data
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v3
       - name: Use Node.js
@@ -32,3 +31,29 @@ jobs:
           git add -A
           git commit -am "Automated data update"
           git push
+
+  ##################################
+  ### Run when a schedule failed ###
+  ##################################
+  restart_when_failed:
+    name: Restarts the scheduled run when it failed
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' && failure()
+    needs: [build]
+    steps:
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Wait 2 minutes
+        run: node waiter.js 120
+        
+      - name: Retry the workflow
+        run: |
+          curl -i \
+          -X POST \
+          -H "Accept: application/vnd.github.v3+json" \
+          -H "Authorization: token ${{ secrets.ACTIONS_PAT }}" \
+          https://api.github.com/repos/estruyf/doctor/actions/workflows/34892269/dispatches \
+          -d '{"ref": "${{ github.ref }}" }'
