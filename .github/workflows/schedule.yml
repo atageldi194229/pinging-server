@@ -1,4 +1,6 @@
 on:
+  push:
+    - branch: main
   repository_dispatch:
   workflow_dispatch:
   schedule:

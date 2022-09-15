@@ -25,10 +25,11 @@ const writeHostsToFiles = (data) => {
     }
   }
 
-  fs.writeFileSync(
-    hostListFile,
-    JSON.stringify([...allHosts, ...newHosts.map(getHost)])
+  let result = [...allHosts, ...newHosts.map(getHost)].filter(
+    (e) => !e.includes("undefined")
   );
+
+  fs.writeFileSync(hostListFile, JSON.stringify(result));
 
   // add new hosts to todays file
   let all = readFile(todayJsonFile, []);
