@@ -9,14 +9,6 @@ const hostListFile = path.join(__dirname, "data", "db.json");
 const todayJsonFile = path.join(__dirname, "data", today + ".json");
 const fileListPath = path.join(__dirname, "data", "files.json");
 
-const URL = process.env.URL;
-
-if (!URL) {
-  new Date().toISOString().substring(0, 10);
-  console.log("URL is not defined");
-  process.exit(1);
-}
-
 const getHost = (e) => `${e.ip}:${e.port}`;
 
 const readFile = (file, defaultValue) => {
@@ -43,16 +35,28 @@ const writeHostsToFiles = (data) => {
   fs.writeFileSync(todayJsonFile, JSON.stringify([...all, ...newHosts]));
 
   let regex = /[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9].json/gm;
-  let files = fs.readdirSync(__dirname).filter((e) => regex.test(e));
+  let files = fs.readdirSync(dir).filter((e) => regex.test(e));
   fs.writeFileSync(fileListPath, JSON.stringify(files));
 };
 
-axios.get(URL).then((res) => {
-  if (res.status !== 200) return;
+const fetchData = () => {
+  const URL = process.env.URL;
 
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
+  if (!URL) {
+    new Date().toISOString().substring(0, 10);
+    console.log("URL is not defined");
+    process.exit(1);
   }
 
-  writeHostsToFiles(res.data);
-});
+  axios.get(URL).then((res) => {
+    if (res.status !== 200) return;
+
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+
+    writeHostsToFiles(res.data);
+  });
+};
+
+fetchData();
