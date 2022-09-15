@@ -33,12 +33,12 @@ jobs:
           git push
 
   ##################################
-  ### Run when a schedule failed ###
+  ### Run recursively ###
   ##################################
   restart_when_failed:
-    name: Restarts the scheduled run when it failed
+    name: Restarts the scheduled run after time
     runs-on: ubuntu-latest
-    if: github.event_name == 'schedule' && failure()
+    # if: github.event_name == 'schedule' && failure()  # Run when a schedule failed
     needs: [build]
     steps:
       - name: Use Node.js
@@ -48,7 +48,7 @@ jobs:
 
       - name: Wait 2 minutes
         run: node waiter.js 120
-        
+
       - name: Retry the workflow
         run: |
           curl -i \
