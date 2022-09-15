@@ -37,6 +37,7 @@ jobs:
   ###################################
   success_job:
     name: Success job
+    runs-on: ubuntu-latest
     needs: [build]
 
   ###################################
@@ -44,6 +45,7 @@ jobs:
   ###################################
   failure_job:
     name: Failure job
+    runs-on: ubuntu-latest
     if: github.event_name == 'schedule' && failure()  # Run when a schedule failed
     needs: [build]
   
