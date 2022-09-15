@@ -7,6 +7,7 @@ jobs:
   build:
     name: Fetch data
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v3
       - name: Use Node.js
@@ -32,26 +33,28 @@ jobs:
           git commit -am "Automated data update"
           git push
 
-  ###################################
-  ### Run when a schedule success ###
-  ###################################
-  success_job:
-    name: Success job
-    runs-on: ubuntu-latest
-    needs: [build]
-    steps:
-    - uses: actions/checkout@v3
+  # ###################################
+  # ### Run when a schedule success ###
+  # ###################################
+  # success_job:
+  #   name: Success job
+  #   runs-on: ubuntu-latest
+  #   needs: [build]
+  #   steps:
+  #     - name: Run Success
+  #       run: echo Success
 
-  ###################################
-  ### Run when a schedule failed ###
-  ###################################
-  failure_job:
-    name: Failure job
-    runs-on: ubuntu-latest
-    if: github.event_name == 'schedule' && failure()  # Run when a schedule failed
-    needs: [build]
-    steps:
-    - uses: actions/checkout@v3
+  # ###################################
+  # ### Run when a schedule failed ###
+  # ###################################
+  # failure_job:
+  #   name: Failure job
+  #   runs-on: ubuntu-latest
+  #   if: github.event_name == 'schedule' && failure()  # Run when a schedule failed
+  #   needs: [build]
+  #   steps:
+  #     - name: Run Failure
+  #       run: echo Failure
 
   ###################################
   ### Run in the end              ###
@@ -59,7 +62,7 @@ jobs:
   run_in_the_end:
     name: Run in the end for recursion
     runs-on: ubuntu-latest
-    needs: [success_job, failure_job]
+    needs: [build]
     steps:
       - uses: actions/checkout@v3
 
