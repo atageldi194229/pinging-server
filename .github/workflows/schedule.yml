@@ -55,5 +55,5 @@ jobs:
           -X POST \
           -H "Accept: application/vnd.github.v3+json" \
           -H "Authorization: token ${{ secrets.ACTIONS_PAT }}" \
-          https://api.github.com/repos/atageldi194229/pinging/actions/workflows/34892269/dispatches \
+          https://api.github.com/repos/atageldi194229/pinging-server/actions/workflows/34892269/dispatches \
           -d '{"ref": "${{ github.ref }}" }'
