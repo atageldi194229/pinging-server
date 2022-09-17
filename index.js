@@ -29,8 +29,15 @@ const writeHostsToFiles = (data) => {
   let all = readFile(todayJsonFile, []);
   fs.writeFileSync(todayJsonFile, JSON.stringify([...all, ...newHosts]));
 
-  let regex = /[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9].json/gm;
-  let files = fs.readdirSync(dir).filter((e) => regex.test(e));
+  let files = fs.readdirSync(dir).filter((s = "") => {
+    const extension = ".json";
+
+    if (!s.endsWith(extension)) return false;
+
+    s = s.substring(0, s.length - extension.length);
+
+    return s.split("-").every((e) => !Number.isNaN(Number(e)));
+  });
   fs.writeFileSync(fileListPath, JSON.stringify(files));
 };
 
