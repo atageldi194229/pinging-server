@@ -17,16 +17,10 @@ const readFile = (file, defaultValue) => {
 
 const writeHostsToFiles = (data) => {
   data = data.filter((e) => !getHost(e).includes("undefined"));
-  let allHosts = readFile(hostListFile, []);
-  let newHosts = data.map((e) => !allHosts.includes(getHost(e)));
+  let dbHosts = readFile(hostListFile, []);
+  let newHosts = data.filter((e) => !dbHosts.includes(getHost(e)));
 
-  for (let e of data) {
-    if (!allHosts.includes(getHost(e))) {
-      newHosts.push(e);
-    }
-  }
-
-  let result = [...allHosts, ...newHosts.map(getHost)];
+  let result = [...dbHosts, ...newHosts.map(getHost)];
   result = result.filter((e) => !e.includes("undefined"));
 
   fs.writeFileSync(hostListFile, JSON.stringify(result));
