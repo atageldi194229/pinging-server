@@ -1,6 +1,6 @@
 const fs = require("fs");
-const axios = require("axios");
 const path = require("path");
+const axios = require("axios");
 
 const today = new Date().toISOString().substring(0, 10);
 
@@ -15,7 +15,7 @@ const readFile = (file, defaultValue) => {
   return fs.existsSync(file) ? require(file) : defaultValue;
 };
 
-const writeHostsToFiles = (data) => {
+const writeHostsToFiles = ({ sstps: data }) => {
   data = data.filter((e) => !getHost(e).includes("undefined"));
   let dbHosts = readFile(hostListFile, []);
   let newHosts = data.filter((e) => !dbHosts.includes(getHost(e)));
