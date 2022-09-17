@@ -15,7 +15,7 @@ const readFile = (file, defaultValue) => {
   return fs.existsSync(file) ? require(file) : defaultValue;
 };
 
-const writeHostsToFiles = ({ sstps: data }) => {
+const writeHostsToFiles = (data) => {
   data = data.filter((e) => !getHost(e).includes("undefined"));
   let dbHosts = readFile(hostListFile, []);
   let newHosts = data.filter((e) => !dbHosts.includes(getHost(e)));
