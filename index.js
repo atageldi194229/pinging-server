@@ -5,9 +5,9 @@ const axios = require("axios");
 const today = new Date().toISOString().substring(0, 10);
 
 const dir = path.join(__dirname, "data");
-const hostListFile = path.join(__dirname, "data", "db.json");
-const todayJsonFile = path.join(__dirname, "data", today + ".json");
-const fileListPath = path.join(__dirname, "data", "files.json");
+const hostListFile = path.join(dir, "db.json");
+const todayJsonFile = path.join(dir, today + ".json");
+const fileListPath = path.join(dir, "files.json");
 
 const getHost = (e) => `${e.ip}:${e.port}`;
 
@@ -29,15 +29,29 @@ const writeHostsToFiles = (data) => {
   let all = readFile(todayJsonFile, []);
   fs.writeFileSync(todayJsonFile, JSON.stringify([...all, ...newHosts]));
 
-  let files = fs.readdirSync(dir).filter((s = "") => {
-    const extension = ".json";
+  let files = fs
+    .readdirSync(dir)
+    .filter((s = "") => {
+      const extension = ".json";
 
-    if (!s.endsWith(extension)) return false;
+      if (!s.endsWith(extension)) return false;
 
-    s = s.substring(0, s.length - extension.length);
+      s = s.substring(0, s.length - extension.length);
 
-    return s.split("-").every((e) => !Number.isNaN(Number(e)));
-  });
+      return s.split("-").every((e) => !Number.isNaN(Number(e)));
+    })
+    .map((name) => {
+      const filePath = path.join(dir, name);
+      const sstpCount = require(filePath).length;
+      const byteSize = fs.statSync(filePath).size;
+
+      return {
+        name,
+        sstpCount,
+        byteSize,
+      };
+    });
+
   fs.writeFileSync(fileListPath, JSON.stringify(files));
 };
 
