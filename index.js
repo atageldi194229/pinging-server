@@ -64,7 +64,7 @@ const fetchData = () => {
     process.exit(1);
   }
 
-  axios.get(URL).then((res) => {
+  return axios.get(URL).then((res) => {
     if (res.status !== 200) return;
 
     if (!fs.existsSync(dir)) {
@@ -75,4 +75,4 @@ const fetchData = () => {
   });
 };
 
-fetchData();
+fetchData().catch(() => fetchData().catch(() => fetchData()));
