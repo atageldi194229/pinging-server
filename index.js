@@ -75,4 +75,8 @@ const fetchData = () => {
   });
 };
 
+try {
 fetchData().catch(() => fetchData().catch(() => fetchData()));
+} catch (e) {
+console.log(e);
+}
