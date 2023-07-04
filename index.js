@@ -112,17 +112,19 @@ const fetchData2 = () => {
   });
 };
 
-try {
-  console.log("started to fetch data...");
-  fetchData();
-} catch (e) {
-  console.log("completed fetching data with error");
-  console.error(e);
-}
+// try {
+//   console.log("started to fetch data...");
+//   fetchData();
+//   console.log("completed fetching data successfully");
+// } catch (e) {
+//   console.log("completed fetching data with error");
+//   console.error(e);
+// }
 
 try {
   console.log("started to fetch data 2...");
   fetchData2();
+  console.log("completed fetching data 2 successfully");
 } catch (e) {
   console.log("completed fetching data 2 with error");
   console.error(e);
