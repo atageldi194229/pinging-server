@@ -86,7 +86,7 @@ const fetchData2 = () => {
     process.exit(1);
   }
 
-  return axios.get(URL).then((res) => {
+  return axios.get(URL2).then((res) => {
     if (res.status !== 200) return;
 
     if (!fs.existsSync(dir)) {
