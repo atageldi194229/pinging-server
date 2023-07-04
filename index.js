@@ -58,6 +58,8 @@ const writeHostsToFiles = (data) => {
 const fetchData = () => {
   const URL = process.env.URL;
 
+  console.log("URL:", URL);
+  
   if (!URL) {
     new Date().toISOString().substring(0, 10);
     console.log("URL is not defined");
