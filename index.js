@@ -55,77 +55,77 @@ const writeHostsToFiles = (data) => {
   fs.writeFileSync(fileListPath, JSON.stringify(files));
 };
 
-const fetchData = () => {
-  const URL = process.env.URL;
+// const fetchData = () => {
+//   const URL = process.env.URL;
 
-  console.log("URL:", URL);
+//   console.log("URL:", URL);
   
-  if (!URL) {
-    console.error("URL is not defined");
-    process.exit(1);
-  }
-
-  return axios.get(URL).then((res) => {
-    if (res.status !== 200) return;
-
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-
-    writeHostsToFiles(res.data);
-  });
-};
-
-// const fetchData2 = () => {
-//   const URL2 = process.env.URL2;
-
-//   console.log("URL2:", URL2);
-  
-//   if (!URL2) {
-//     console.error("URL2 is not defined");
+//   if (!URL) {
+//     console.error("URL is not defined");
 //     process.exit(1);
 //   }
 
-//   return axios.get(URL2).then((res) => {
+//   return axios.get(URL).then((res) => {
 //     if (res.status !== 200) return;
 
 //     if (!fs.existsSync(dir)) {
 //       fs.mkdirSync(dir, { recursive: true });
 //     }
 
-//     const data = res.data.map(e => ({
-//       hostname: e.ip,
-//       ip: e.ip,
-//       port: Number(e.port),
-//       info:"test test test",
-//       info2:"NORTH AMERICA 29.04",
-//       location: {
-//         country: e.location,
-//         short: e.location,
-//         name: e.location,
-//       },
-//       createdAt: e.createdAt,
-//       id:"1212546"
-//     }));
-    
-//     writeHostsToFiles(data);
+//     writeHostsToFiles(res.data);
 //   });
 // };
 
-try {
-  console.log("started to fetch data...");
-  fetchData();
-  console.log("completed fetching data successfully");
-} catch (e) {
-  console.log("completed fetching data with error");
-  console.error(e);
-}
+const fetchData2 = () => {
+  const URL2 = process.env.URL2;
+
+  console.log("URL2:", URL2);
+  
+  if (!URL2) {
+    console.error("URL2 is not defined");
+    process.exit(1);
+  }
+
+  return axios.get(URL2).then((res) => {
+    if (res.status !== 200) return;
+
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+
+    const data = res.data.data.map(e => ({
+      hostname: e.ip,
+      ip: e.ip,
+      port: Number(e.port),
+      info:"test test test",
+      info2:"NORTH AMERICA 29.04",
+      location: {
+        country: e.location,
+        short: e.location,
+        name: e.location,
+      },
+      createdAt: e.createdAt,
+      id:"1212546"
+    }));
+    
+    writeHostsToFiles(data);
+  });
+};
 
 // try {
-//   console.log("started to fetch data 2...");
-//   fetchData2();
-//   console.log("completed fetching data 2 successfully");
+//   console.log("started to fetch data...");
+//   fetchData();
+//   console.log("completed fetching data successfully");
 // } catch (e) {
-//   console.log("completed fetching data 2 with error");
+//   console.log("completed fetching data with error");
 //   console.error(e);
 // }
+
+try {
+  console.log("started to fetch data 2...");
+  fetchData2();
+  console.log("completed fetching data 2 successfully");
+} catch (e) {
+  console.log("completed fetching data 2 with error");
+  console.error(e);
+}
