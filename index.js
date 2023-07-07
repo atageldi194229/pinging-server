@@ -93,7 +93,7 @@ const fetchData2 = () => {
       fs.mkdirSync(dir, { recursive: true });
     }
 
-    writeHostsToFiles(res.data);
+    writeHostsToFiles(res.data.data);
   });
 };
 
