@@ -93,22 +93,7 @@ const fetchData2 = () => {
       fs.mkdirSync(dir, { recursive: true });
     }
 
-    const data = res.data.data.map(e => ({
-      hostname: e.ip,
-      ip: e.ip,
-      port: Number(e.port),
-      info:"test test test",
-      info2:"NORTH AMERICA 29.04",
-      location: {
-        country: e.location,
-        short: e.location,
-        name: e.location,
-      },
-      createdAt: e.createdAt,
-      id:"1212546"
-    }));
-    
-    writeHostsToFiles(data);
+    writeHostsToFiles(res.data);
   });
 };
 
