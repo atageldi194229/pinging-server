@@ -29,7 +29,7 @@ const writeHostsToFiles = (data) => {
 
   fs.writeFileSync(hostListFile, JSON.stringify(result));
 
-  // add new hosts to todays file
+  // add new hosts to today's file
   let all = readFile(todayJsonFile, []);
   fs.writeFileSync(todayJsonFile, JSON.stringify([...all, ...newHosts]));
 
@@ -59,11 +59,43 @@ const writeHostsToFiles = (data) => {
   fs.writeFileSync(fileListPath, JSON.stringify(files));
 };
 
+const fetchData2 = async () => {
+  const URL2 = process.env.URL2;
+
+  console.log("URL2:", URL2);
+
+  if (!URL2) {
+    console.error("URL2 is not defined");
+    process.exit(1);
+  }
+
+  try {
+    console.log("Started to fetch data 2...");
+    const response = await axios.get(URL2, { timeout: 10000 }); // Set timeout to 10 seconds
+    console.log("Completed fetching data 2 successfully");
+
+    if (response.status !== 200) {
+      console.error(`Error: Received status code ${response.status}`);
+      return;
+    }
+
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+
+    writeHostsToFiles(response.data.data);
+  } catch (error) {
+    console.error("Error fetching data 2:");
+    console.error(error.message);
+  }
+};
+
+
 // const fetchData = () => {
 //   const URL = process.env.URL;
 
 //   console.log("URL:", URL);
-  
+
 //   if (!URL) {
 //     console.error("URL is not defined");
 //     process.exit(1);
@@ -80,27 +112,6 @@ const writeHostsToFiles = (data) => {
 //   });
 // };
 
-const fetchData2 = () => {
-  const URL2 = process.env.URL2;
-
-  console.log("URL2:", URL2);
-  
-  if (!URL2) {
-    console.error("URL2 is not defined");
-    process.exit(1);
-  }
-
-  return axios.get(URL2).then((res) => {
-    if (res.status !== 200) return;
-
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-
-    writeHostsToFiles(res.data.data);
-  });
-};
-
 // try {
 //   console.log("started to fetch data...");
 //   fetchData();
@@ -109,12 +120,3 @@ const fetchData2 = () => {
 //   console.log("completed fetching data with error");
 //   console.error(e);
 // }
-
-try {
-  console.log("started to fetch data 2...");
-  fetchData2();
-  console.log("completed fetching data 2 successfully");
-} catch (e) {
-  console.log("completed fetching data 2 with error");
-  console.error(e);
-}
