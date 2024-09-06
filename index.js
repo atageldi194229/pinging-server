@@ -20,18 +20,7 @@ const writeHostsToFiles = (data) => {
     console.error("Data is not an array");
     return;
   }
-  
-  // Print data after checking
-  console.log("Data:", data);
-
-  // Filter out invalid entries
-  data = data.filter((e) => e && e.ip && e.port && !getHost(e).includes("undefined"));
-
-  if (data.length === 0) {
-    console.error("No valid hosts to process");
-    return;
-  }
-
+  data = data.filter((e) => !getHost(e).includes("undefined"));
   let dbHosts = readFile(hostListFile, []);
   let newHosts = data.filter((e) => !dbHosts.includes(getHost(e)));
 
@@ -40,7 +29,7 @@ const writeHostsToFiles = (data) => {
 
   fs.writeFileSync(hostListFile, JSON.stringify(result));
 
-  // Add new hosts to today's file
+  // add new hosts to todays file
   let all = readFile(todayJsonFile, []);
   fs.writeFileSync(todayJsonFile, JSON.stringify([...all, ...newHosts]));
 
@@ -73,16 +62,17 @@ const writeHostsToFiles = (data) => {
 const fetchData2 = () => {
   const URL2 = process.env.URL2;
 
-  console.log("URL2:", URL2);  // Debug the URL
-  
+  console.log("URL2:", URL2); // Debug the URL
+
   if (!URL2) {
     console.error("URL2 is not defined");
     process.exit(1);
   }
 
-  return axios.get(URL2)
+  return axios
+    .get(URL2)
     .then((res) => {
-      console.log("Fetched Data:", res.data);  // Log the fetched data to inspect its structure
+      console.log("Fetched Data:", res.data); // Log the fetched data to inspect its structure
 
       if (res.status !== 200) {
         throw new Error(`Unexpected status code: ${res.status}`);
@@ -97,12 +87,12 @@ const fetchData2 = () => {
 
       // Validate each entry in data
       data.forEach((entry, index) => {
-        if (!entry || typeof entry.ip !== 'string' || typeof entry.port !== 'number') {
+        if (!entry || typeof entry.ip !== "string" || typeof entry.port !== "number") {
           console.warn(`Invalid entry at index ${index}:`, entry);
         }
       });
 
-      writeHostsToFiles(data);  // Pass the data to writeHostsToFiles
+      writeHostsToFiles(data); // Pass the data to writeHostsToFiles
     })
     .catch((error) => {
       console.error("Error fetching data:", error);
