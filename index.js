@@ -72,7 +72,7 @@ const fetchData2 = () => {
   return axios
     .get(URL2)
     .then((res) => {
-      console.log("Fetched Data:", res.data); // Log the fetched data to inspect its structure
+      // console.log("Fetched Data:", res.data); // Log the fetched data to inspect its structure
 
       if (res.status !== 200) {
         throw new Error(`Unexpected status code: ${res.status}`);
@@ -83,7 +83,7 @@ const fetchData2 = () => {
       }
 
       // Check if data is an array, if not, wrap it in an array
-      const data = Array.isArray(res.data.data) ? res.data.data : [res.data.data];
+      const data = Array.isArray(res.data) ? res.data : [res.data];
 
       // Validate each entry in data
       data.forEach((entry, index) => {
