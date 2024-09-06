@@ -20,10 +20,18 @@ const writeHostsToFiles = (data) => {
     console.error("Data is not an array");
     return;
   }
-  // I want print data here after check
-  console.log(data);
+  
+  // Print data after checking
+  console.log("Data:", data);
 
-  data = data.filter((e) => !getHost(e).includes("undefined"));
+  // Filter out invalid entries
+  data = data.filter((e) => e && e.ip && e.port && !getHost(e).includes("undefined"));
+
+  if (data.length === 0) {
+    console.error("No valid hosts to process");
+    return;
+  }
+
   let dbHosts = readFile(hostListFile, []);
   let newHosts = data.filter((e) => !dbHosts.includes(getHost(e)));
 
@@ -32,7 +40,7 @@ const writeHostsToFiles = (data) => {
 
   fs.writeFileSync(hostListFile, JSON.stringify(result));
 
-  // add new hosts to todays file
+  // Add new hosts to today's file
   let all = readFile(todayJsonFile, []);
   fs.writeFileSync(todayJsonFile, JSON.stringify([...all, ...newHosts]));
 
@@ -72,31 +80,41 @@ const fetchData2 = () => {
     process.exit(1);
   }
 
-  return axios.get(URL2).then((res) => {
-    console.log(res.data);  // Log the fetched data to inspect its structure
+  return axios.get(URL2)
+    .then((res) => {
+      console.log("Fetched Data:", res.data);  // Log the fetched data to inspect its structure
 
-    if (res.status !== 200) return;
+      if (res.status !== 200) {
+        throw new Error(`Unexpected status code: ${res.status}`);
+      }
 
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
 
-    // Check if data is an array, if not, wrap it in an array
-    const data = Array.isArray(res.data.data) ? res.data.data : [res.data.data];
+      // Check if data is an array, if not, wrap it in an array
+      const data = Array.isArray(res.data.data) ? res.data.data : [res.data.data];
 
-    writeHostsToFiles(data);  // Pass the data to writeHostsToFiles
-  });
+      // Validate each entry in data
+      data.forEach((entry, index) => {
+        if (!entry || typeof entry.ip !== 'string' || typeof entry.port !== 'number') {
+          console.warn(`Invalid entry at index ${index}:`, entry);
+        }
+      });
+
+      writeHostsToFiles(data);  // Pass the data to writeHostsToFiles
+    })
+    .catch((error) => {
+      console.error("Error fetching data:", error);
+    });
 };
-  
-
 
 try {
-  console.log("started to fetch data 2...");
+  console.log("Started to fetch data 2...");
   fetchData2();
-  console.log("completed fetching data 2 successfully");
+  console.log("Completed fetching data 2 successfully");
 } catch (e) {
-  console.log("completed fetching data 2 with error");
-  console.error(e);
+  console.error("Error occurred:", e);
 }
 
 // const fetchData = () => {
