@@ -20,6 +20,9 @@ const writeHostsToFiles = (data) => {
     console.error("Data is not an array");
     return;
   }
+  // I want print data here after check
+  console.log(data);
+
   data = data.filter((e) => !getHost(e).includes("undefined"));
   let dbHosts = readFile(hostListFile, []);
   let newHosts = data.filter((e) => !dbHosts.includes(getHost(e)));
