@@ -65,7 +65,7 @@ const writeHostsToFiles = (data) => {
 const fetchData2 = () => {
   const URL2 = process.env.URL2;
 
-  console.log("URL2:", URL2);  // Logging the URL for debug purposes
+  console.log("URL2:", URL2);  // Debug the URL
   
   if (!URL2) {
     console.error("URL2 is not defined");
@@ -73,7 +73,7 @@ const fetchData2 = () => {
   }
 
   return axios.get(URL2).then((res) => {
-    console.log(res.data);  // Add this line to check the data format
+    console.log(res.data);  // Log the fetched data to inspect its structure
 
     if (res.status !== 200) return;
 
@@ -81,9 +81,13 @@ const fetchData2 = () => {
       fs.mkdirSync(dir, { recursive: true });
     }
 
-    writeHostsToFiles(res.data.data);  // Ensure this is correct based on the data structure
+    // Check if data is an array, if not, wrap it in an array
+    const data = Array.isArray(res.data.data) ? res.data.data : [res.data.data];
+
+    writeHostsToFiles(data);  // Pass the data to writeHostsToFiles
   });
 };
+  
 
 
 try {
