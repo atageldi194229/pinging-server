@@ -1,10 +1,10 @@
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   repository_dispatch:
   workflow_dispatch:
   schedule:
-    - cron: '*/5 * * * *'
+    - cron: "*/5 * * * *"
 jobs:
   build:
     name: Fetch data
@@ -21,18 +21,18 @@ jobs:
         run: npm run build --if-present
         env:
           URL: ${{ secrets.URL }}
-          URL2: ${{ secrets.URL2 }}
-      
+          # URL2: ${{ secrets.URL2 }}
+          URL2: "https://giamping.com/repository/vpnrequestmobile.php?message=MBVRvEzBAVRWJST8NhVTRCAKbh2gO2ztsF5pwbdVfjd1UaqvsdTg9K122p1JxkuXgILF5npSo48jFf9ZAPnSe2rIRxq3QCGClEu21YSWLU6F3Nvf0XMJ2LU34sHuKa8go0DN0vHaf2OEFYNrhcXcGpozFezCj8OlN8cPzPrnIsLLMzBeTcglmF0jFS9gZZQipqU/3pbsftSRlUY1j5/BMpGPVPNhWMxE4m71qx7Ryfy5j967hXwjrP7dhrH63izHZyhbQIGPVPNXQXB1nf70ftqAgVEQNw=="
+
       # - uses: stefanzweifel/git-auto-commit-action@v4
       #   with:
       #     commit_message: Data update
-      
+
       # - name: Deploy
       #   uses: peaceiris/actions-gh-pages@v3
       #   with:
       #     github_token: ${{ secrets.GITHUB_TOKEN }}
       #     publish_dir: ./data
-
 
       - name: Commit report
         run: |
@@ -42,7 +42,7 @@ jobs:
           git add -A
 
           # Check if there are changes before committing
-          
+
           git add -A
           if git diff --cached --quiet; then
             echo "No changes to commit"
