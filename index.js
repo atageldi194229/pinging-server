@@ -16,10 +16,6 @@ const readFile = (file, defaultValue) => {
 };
 
 const writeHostsToFiles = (data) => {
-  if (!Array.isArray(data)) {
-    console.error("Data is not an array");
-    return;
-  }
   data = data.filter((e) => !getHost(e).includes("undefined"));
   let dbHosts = readFile(hostListFile, []);
   let newHosts = data.filter((e) => !dbHosts.includes(getHost(e)));
