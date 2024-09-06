@@ -28,7 +28,7 @@ The Pinging Server is a tool designed to monitor and track the response times of
 1. Clone the repository:
 
    ```sh
-   git clone https://github.com/Xxspoki/pinging-server-main.git
+   git clone https://github.com/haitovs/pinging-server-main.git
    ```
 
 2. Install dependencies:
