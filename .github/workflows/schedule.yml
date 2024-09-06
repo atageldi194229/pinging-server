@@ -9,7 +9,7 @@ jobs:
   build:
     name: Fetch data
     runs-on: ubuntu-latest
-    # continue-on-error: true
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v3
       - name: Use Node.js
