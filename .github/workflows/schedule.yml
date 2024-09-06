@@ -39,17 +39,11 @@ jobs:
           git config --global user.name 'atageldi194229'
           git config --global user.email 'atageldi194229@gmail.com'
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+          
           git add -A
-
-          # Check if there are changes before committing
-
-          git add -A
-          if git diff --cached --quiet; then
-            echo "No changes to commit"
-          else
-            git commit -am "Automated data update"
-            git push
-          fi
+          git commit -am "Automated data update"
+          git push
+          
 
   # ###################################
   # ### Run in the end              ###
