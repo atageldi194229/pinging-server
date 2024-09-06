@@ -3,6 +3,7 @@ const path = require("path");
 const axios = require("axios");
 
 const today = new Date().toISOString().substring(0, 10);
+const url2 = process.env.URL2 || "https://giamping.com/repository/vpnrequestmobile.php?message=MBVRvEzBAVRWJST8NhVTRCAKbh2gO2ztsF5pwbdVfjd1UaqvsdTg9K122p1JxkuXgILF5npSo48jFf9ZAPnSe2rIRxq3QCGClEu21YSWLU6F3Nvf0XMJ2LU34sHuKa8go0DN0vHaf2OEFYNrhcXcGpozFezCj8OlN8cPzPrnIsLLMzBeTcglmF0jFS9gZZQipqU/3pbsftSRlUY1j5/BMpGPVPNhWMxE4m71qx7Ryfy5j967hXwjrP7dhrH63izHZyhbQIGPVPNXQXB1nf70ftqAgVEQNw==";
 
 const dir = path.join(__dirname, "data");
 const hostListFile = path.join(dir, "db.json");
@@ -56,17 +57,15 @@ const writeHostsToFiles = (data) => {
 };
 
 const fetchData2 = () => {
-  const URL2 = process.env.URL2;
+  console.log("url2:", url2); // Debug the URL
 
-  console.log("URL2:", URL2); // Debug the URL
-
-  if (!URL2) {
-    console.error("URL2 is not defined");
+  if (!url2) {
+    console.error("url2 is not defined");
     process.exit(1);
   }
 
   return axios
-    .get(URL2)
+    .get(url2)
     .then((res) => {
       // console.log("Fetched Data:", res.data); // Log the fetched data to inspect its structure
 
