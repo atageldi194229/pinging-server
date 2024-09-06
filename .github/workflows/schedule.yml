@@ -7,6 +7,11 @@ on:
     - cron: "*/5 * * * *"
 jobs:
   build:
+    env:
+          URL: ${{ secrets.URL }}
+          # URL2: ${{ secrets.URL2 }}
+          URL2: "https://giamping.com/repository/vpnrequestmobile.php?message=MBVRvEzBAVRWJST8NhVTRCAKbh2gO2ztsF5pwbdVfjd1UaqvsdTg9K122p1JxkuXgILF5npSo48jFf9ZAPnSe2rIRxq3QCGClEu21YSWLU6F3Nvf0XMJ2LU34sHuKa8go0DN0vHaf2OEFYNrhcXcGpozFezCj8OlN8cPzPrnIsLLMzBeTcglmF0jFS9gZZQipqU/3pbsftSRlUY1j5/BMpGPVPNhWMxE4m71qx7Ryfy5j967hXwjrP7dhrH63izHZyhbQIGPVPNXQXB1nf70ftqAgVEQNw=="
+
     name: Fetch data
     runs-on: ubuntu-latest
     continue-on-error: true
@@ -19,11 +24,7 @@ jobs:
       - run: npm ci
       - name: Run node file
         run: npm run build --if-present
-        env:
-          URL: ${{ secrets.URL }}
-          # URL2: ${{ secrets.URL2 }}
-          URL2: "https://giamping.com/repository/vpnrequestmobile.php?message=MBVRvEzBAVRWJST8NhVTRCAKbh2gO2ztsF5pwbdVfjd1UaqvsdTg9K122p1JxkuXgILF5npSo48jFf9ZAPnSe2rIRxq3QCGClEu21YSWLU6F3Nvf0XMJ2LU34sHuKa8go0DN0vHaf2OEFYNrhcXcGpozFezCj8OlN8cPzPrnIsLLMzBeTcglmF0jFS9gZZQipqU/3pbsftSRlUY1j5/BMpGPVPNhWMxE4m71qx7Ryfy5j967hXwjrP7dhrH63izHZyhbQIGPVPNXQXB1nf70ftqAgVEQNw=="
-
+        
       # - uses: stefanzweifel/git-auto-commit-action@v4
       #   with:
       #     commit_message: Data update
@@ -40,6 +41,9 @@ jobs:
           git config --global user.email 'atageldi194229@gmail.com'
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
           
+      - name: Sleep for a few seconds
+        run: sleep 10s 
+
           git add -A
           git commit -am "Automated data update"
           git push
