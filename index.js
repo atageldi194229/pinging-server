@@ -67,8 +67,6 @@ const fetchData2 = () => {
   return axios
     .get(url2)
     .then((res) => {
-      // console.log("Fetched Data:", res.data); // Log the fetched data to inspect its structure
-
       if (res.status !== 200) {
         throw new Error(`Unexpected status code: ${res.status}`);
       }
