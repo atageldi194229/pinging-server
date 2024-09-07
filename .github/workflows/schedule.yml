@@ -8,9 +8,9 @@ on:
 
 jobs:
   build:
-    env:
-      URL: ${{ secrets.URL }}
-      URL2: ${{ secrets.URL2 }}
+    # env:
+      # URL: ${{ secrets.URL }}
+      # URL2: ${{ secrets.URL2 }}
 
     name: Fetch data
     runs-on: ubuntu-latest
