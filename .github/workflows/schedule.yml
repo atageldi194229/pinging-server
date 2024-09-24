@@ -28,7 +28,7 @@ jobs:
 
       - name: Run Python script
         run: |
-          python your_script.py
+          python main.py
 
       - name: Commit report
         run: |
