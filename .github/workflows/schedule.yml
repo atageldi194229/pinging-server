@@ -2,11 +2,11 @@ name: Fetch and Process Data
 
 on:
   push:
-    branches: [main]
+    branches: [main]  # Триггер при каждом коммите в ветку main
   repository_dispatch:
   workflow_dispatch:
   schedule:
-    - cron: "*/5 * * * *"
+    - cron: "*/5 * * * *"  # Триггер по расписанию каждые 5 минут
 
 jobs:
   build:
