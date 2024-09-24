@@ -87,7 +87,7 @@ def fetch_data(url):
 def save_data_to_json(data, file_path):
     logger.info(f"Saving data to file: {file_path}")
     with open(file_path, 'w', encoding='utf-8') as f:
-        json.dump(data, f, ensure_ascii=False, indent=4)
+        json.dump(data, f, ensure_ascii=False)
 
 # Обновление файла db.json с уникальными IP:Port
 def update_db(ip_port_list, db_file):
