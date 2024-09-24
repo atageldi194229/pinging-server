@@ -102,7 +102,7 @@ def update_db(ip_port_list, db_file):
 
     logger.info(f"Updated db.json with {len(updated_data)} unique entries (removed duplicates).")
     with open(db_file, 'w', encoding='utf-8') as f:
-        json.dump(updated_data, f, ensure_ascii=False, indent=4)
+        json.dump(updated_data, f, ensure_ascii=False)
 
 # Обновление файла files.json с информацией о файлах
 def update_files_info(data_dir, files_info_file):
@@ -127,7 +127,7 @@ def update_files_info(data_dir, files_info_file):
 
     # Сохраняем обновлённую информацию о файлах
     with open(files_info_file, 'w', encoding='utf-8') as f:
-        json.dump(file_data, f, ensure_ascii=False, indent=4)
+        json.dump(file_data, f, ensure_ascii=False)
 
     logger.info(f"files.json updated with {len(file_data)} entries.")
 
