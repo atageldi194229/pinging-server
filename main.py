@@ -33,20 +33,16 @@ def parse_line(line):
 
         # Обработка данных
         ip = data.get("ip")
-        # Если порт не указан, то использовать 443
         port = int(data.get("port")) if data.get("port") else 443
         hostname = data.get("hostname")
         location_info = data.get("location_info").split(" ")
         sessions = data.get("sessions")
         country_info = data.get("country_info")
 
-        # Парсинг информации о локации и стране
-        location_split = country_info.split("~")
-        country_full = location_split[0].strip()
-        location_name = location_split[1].strip() if len(location_split) > 1 else ""
-
-        country_split = country_full.split("-")
-        short_country = country_split[1].strip() if len(country_split) > 1 else ""
+        # Парсинг страны (только название страны без кода и компаний)
+        country_full = country_info.split("~")[0].strip()
+        # Извлечение кода страны (JP, TW, и т.д.)
+        country_short = country_full.split(" - ")[0].strip()
 
         return {
             "hostname": hostname,
@@ -55,9 +51,8 @@ def parse_line(line):
             "info": sessions,
             "info2": " ".join(location_info),
             "location": {
-                "country": country_full,
-                "short": short_country,
-                "name": location_name
+                "country": country_full.split(" - ")[1] if " - " in country_full else country_full,  # только название страны
+                "short": country_short  # только код страны
             },
             "id": hostname.split("VPN")[-1],
             "key": f"{ip}:{port}"
@@ -90,7 +85,7 @@ def update_db(ip_port_list, db_file):
     else:
         existing_data = []
 
-    # Добавляем только новые комбинации IP:Port
+    # Добавляем только уникальные новые комбинации IP:Port
     updated_data = list(set(existing_data + ip_port_list))
 
     with open(db_file, 'w', encoding='utf-8') as f:
