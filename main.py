@@ -22,7 +22,7 @@ files_info_file = os.path.join(data_dir, "files.json")
 
 # Регулярное выражение для парсинга строк
 pattern = re.compile(
-    r"(?P<session_id>\d+)•(?P<sessions>\d+) SESSIONS.*?USERS•(?P<location_info>.*?)•(?P<hostname>VPN[0-9]+\.OPENGW\.NET)(?::(?P<port>\d+))?•(?P<country_info>.*?)★VPNGATE★•(?P<ip>[0-9.]+)↓"
+    r"(?P<session_id>\d+)•(?P<sessions>\d+) SESSIONS.*?USERS•(?P<location_info>.*?)•(?P<hostname>VPN[0-9]+\.OPENGW\.NET)(?::(?P<port>[0-9]+))?•(?P<country_info>.+?)★VPNGATE★•(?P<ip>[0-9.]+)↓"
 )
 
 # Функция для парсинга строки
@@ -36,29 +36,28 @@ def parse_line(line):
         # Если порт не указан, то использовать 443
         port = int(data.get("port")) if data.get("port") else 443
         hostname = data.get("hostname")
+        location_info = data.get("location_info").split(" ")
         sessions = data.get("sessions")
-
-        # Парсинг информации о стране
         country_info = data.get("country_info")
-        location_split = country_info.split("-")
-        
-        # Извлечение полного названия страны и кода
-        if len(location_split) > 1:
-            short_country = location_split[0].strip()  # Код страны (например, "JP")
-            country_full = location_split[1].strip().split("~")[0].strip()  # Полное название страны, удаляя всё после "~"
-        else:
-            short_country = ""
-            country_full = country_info.strip()
+
+        # Парсинг информации о локации и стране
+        location_split = country_info.split("~")
+        country_full = location_split[0].strip()
+        location_name = location_split[1].strip() if len(location_split) > 1 else ""
+
+        country_split = country_full.split("-")
+        short_country = country_split[1].strip() if len(country_split) > 1 else ""
 
         return {
             "hostname": hostname,
             "ip": ip,
             "port": port,  # Теперь всегда есть порт
             "info": sessions,
-            "info2": data.get("location_info"),
+            "info2": " ".join(location_info),
             "location": {
-                "country": country_full,  # Полное название страны
-                "short": short_country      # Код страны
+                "country": country_full,
+                "short": short_country,
+                "name": location_name
             },
             "id": hostname.split("VPN")[-1],
             "key": f"{ip}:{port}"
@@ -85,20 +84,17 @@ def save_data_to_json(data, file_path):
 
 # Обновление файла db.json с уникальными IP:Port
 def update_db(ip_port_list, db_file):
-    existing_data = set()  # Используем множество для уникальности
-
-    # Загружаем существующие IP:Port
     if os.path.exists(db_file):
         with open(db_file, 'r', encoding='utf-8') as f:
-            existing_data = set(json.load(f))  # Загружаем в множество
+            existing_data = json.load(f)
+    else:
+        existing_data = []
 
-    # Добавляем новые уникальные комбинации IP:Port
-    for ip_port in ip_port_list:
-        existing_data.add(ip_port)
+    # Добавляем только новые комбинации IP:Port
+    updated_data = list(set(existing_data + ip_port_list))
 
-    # Сохраняем обновлённый список в db.json
     with open(db_file, 'w', encoding='utf-8') as f:
-        json.dump(list(existing_data), f, ensure_ascii=False, indent=4)
+        json.dump(updated_data, f, ensure_ascii=False, indent=4)
 
 # Обновление файла files.json с информацией о файлах
 def update_files_info(data_dir, files_info_file):
@@ -135,7 +131,7 @@ if __name__ == "__main__":
     # Сохраняем данные в файл за сегодня
     save_data_to_json(parsed_data, today_json_file)
 
-    # Обновляем db.json с новыми уникальными IP:Port
+    # Обновляем db.json с новыми IP:Port
     ip_port_list = [entry['key'] for entry in parsed_data]
     update_db(ip_port_list, db_file)
 
