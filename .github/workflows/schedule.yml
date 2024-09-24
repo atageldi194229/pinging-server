@@ -25,7 +25,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: ./repo
-        run: pip3 install requests
+        run: pip3 install requests loguru
 
       - name: Run Python script
         working-directory: ./repo
