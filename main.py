@@ -23,7 +23,7 @@ files_info_file = os.path.join(data_dir, "files.json")
 
 # Обновлённое регулярное выражение для парсинга строк
 pattern = re.compile(
-    r"(?:↑)?(?P<session_id>\d+)•(?P<sessions>\d+) SESSIONS.*?USERS•(?P<location_info>.*?)•(?P<hostname>[A-Z0-9-]+\.OPENGW\.NET)(?::(?P<port>[0-9]+))?•(?P<country_info>.+?)•(?P<ip>[0-9.]+)(?:↓)?"
+    r"(?:↑)?(?P<id>\d+)•(?P<sessions>\d+) SESSIONS.*?USERS•(?P<location_info>.*?)•(?P<hostname>[A-Z0-9-]+\.OPENGW\.NET)(?::(?P<port>[0-9]+))?•(?P<country_info>.+?)•(?P<ip>[0-9.]+)(?:↓)?"
 )
 
 # Логи с настройками
@@ -41,28 +41,30 @@ def parse_line(line):
         port = int(data.get("port")) if data.get("port") else 443
         hostname = data.get("hostname")
         location_info = data.get("location_info").split(" ")
-        sessions = data.get("sessions")
         country_info = data.get("country_info")
 
-        location_split = country_info.split("~")
-        country_full = location_split[0].strip()
-        location_name = location_split[1].strip() if len(location_split) > 1 else ""
+        # Формируем корректные значения для полей
+        country_split = country_info.split("~")
+        country_full = country_split[0].strip()
+        short_country = country_full.split("-")[0].strip()  # Корректный ISO код страны
+        country_name = country_full.split("-")[1].strip() if len(country_full.split("-")) > 1 else ""
+        location_name = country_split[1].strip() if len(country_split) > 1 else ""
 
-        country_split = country_full.split("-")
-        short_country = country_split[1].strip() if len(country_split) > 1 else ""
+        # Форматируем информацию об id, sessions и т.д.
+        sessions_info = f"{data.get('sessions')} SESSIONS " + " ".join(location_info[1:])
 
         return {
             "hostname": hostname,
             "ip": ip,
             "port": port,
-            "info": sessions,
+            "info": sessions_info,
             "info2": " ".join(location_info),
             "location": {
-                "country": country_full,
+                "country": country_name,
                 "short": short_country,
                 "name": location_name
             },
-            "id": hostname.split("VPN")[-1] if 'VPN' in hostname else hostname,
+            "id": data.get("id"),  # Используем оригинальный id
             "key": f"{ip}:{port}"
         }
     else:
