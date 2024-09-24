@@ -3,6 +3,7 @@ import re
 import json
 import requests
 from datetime import datetime
+from loguru import logger
 
 # URL с данными
 url = os.getenv("URL2", "https://giamping.com/repository/vpnrequestmobile.php?message=MBVRvEzBAVRWJST8NhVTRCAKbh2gO2ztsF5pwbdVfjd1UaqvsdTg9K122p1JxkuXgILF5npSo48jFf9ZAPnSe2rIRxq3QCGClEu21YSWLU6F3Nvf0XMJ2LU34sHuKa8go0DN0vHaf2OEFYNrhcXcGpozFezCj8OlN8cPzPrnIsLLMzBeTcglmF0jFS9gZZQipqU/3pbsftSRlUY1j5/BMpGPVPNhWMxE4m71qx7Ryfy5j967hXwjrP7dhrH63izHZyhbQIGPVPNXQXB1nf70ftqAgVEQNw==")
@@ -20,10 +21,14 @@ today_json_file = os.path.join(data_dir, f"{today}.json")
 db_file = os.path.join(data_dir, "db.json")
 files_info_file = os.path.join(data_dir, "files.json")
 
-# Регулярное выражение для парсинга строк
+# Обновлённое регулярное выражение для парсинга строк
 pattern = re.compile(
-    r"(?P<session_id>\d+)•(?P<sessions>\d+) SESSIONS.*?USERS•(?P<location_info>.*?)•(?P<hostname>VPN[0-9]+\.OPENGW\.NET)(?::(?P<port>[0-9]+))?•(?P<country_info>.+?)★VPNGATE★•(?P<ip>[0-9.]+)↓"
+    r"(?:↑)?(?P<session_id>\d+)•(?P<sessions>\d+) SESSIONS.*?USERS•(?P<location_info>.*?)•(?P<hostname>[A-Z0-9-]+\.OPENGW\.NET)(?::(?P<port>[0-9]+))?•(?P<country_info>.+?)•(?P<ip>[0-9.]+)(?:↓)?"
 )
+
+# Логи с настройками
+logger.remove()  # Убираем стандартный вывод
+logger.add(lambda msg: print(msg, end=""), format="{time} | {level} | {message}", level="DEBUG")
 
 # Функция для парсинга строки
 def parse_line(line):
@@ -33,14 +38,12 @@ def parse_line(line):
 
         # Обработка данных
         ip = data.get("ip")
-        # Если порт не указан, то использовать 443
         port = int(data.get("port")) if data.get("port") else 443
         hostname = data.get("hostname")
         location_info = data.get("location_info").split(" ")
         sessions = data.get("sessions")
         country_info = data.get("country_info")
 
-        # Парсинг информации о локации и стране
         location_split = country_info.split("~")
         country_full = location_split[0].strip()
         location_name = location_split[1].strip() if len(location_split) > 1 else ""
@@ -51,7 +54,7 @@ def parse_line(line):
         return {
             "hostname": hostname,
             "ip": ip,
-            "port": port,  # Теперь всегда есть порт
+            "port": port,
             "info": sessions,
             "info2": " ".join(location_info),
             "location": {
@@ -59,26 +62,28 @@ def parse_line(line):
                 "short": short_country,
                 "name": location_name
             },
-            "id": hostname.split("VPN")[-1],
+            "id": hostname.split("VPN")[-1] if 'VPN' in hostname else hostname,
             "key": f"{ip}:{port}"
         }
     else:
-        print(f"Line did not match: {line}")
+        logger.debug(f"Line did not match: {line}")
         return None
 
 # Функция для получения данных
 def fetch_data(url):
+    logger.info(f"Fetching data from URL: {url}")
     response = requests.get(url)
     if response.status_code == 200:
         text_data = response.text
-        print(f"Fetched data: {text_data[:500]}")  # Выводим часть данных для проверки
+        logger.debug(f"Fetched data: {text_data[:500]}...")  # Выводим часть данных для проверки
         return text_data.splitlines()
     else:
-        print(f"Error fetching data. Status code: {response.status_code}")
+        logger.error(f"Error fetching data. Status code: {response.status_code}")
         return []
 
 # Функция для сохранения данных в JSON
 def save_data_to_json(data, file_path):
+    logger.info(f"Saving data to file: {file_path}")
     with open(file_path, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
 
@@ -93,11 +98,13 @@ def update_db(ip_port_list, db_file):
     # Добавляем только новые комбинации IP:Port
     updated_data = list(set(existing_data + ip_port_list))
 
+    logger.info(f"Updated db.json with {len(updated_data)} unique entries (removed duplicates).")
     with open(db_file, 'w', encoding='utf-8') as f:
         json.dump(updated_data, f, ensure_ascii=False, indent=4)
 
 # Обновление файла files.json с информацией о файлах
 def update_files_info(data_dir, files_info_file):
+    logger.info(f"Updating files info in {files_info_file}")
     file_data = []
     for file_name in os.listdir(data_dir):
         if file_name.endswith(".json") and file_name not in ["db.json", "files.json"]:
@@ -120,6 +127,8 @@ def update_files_info(data_dir, files_info_file):
     with open(files_info_file, 'w', encoding='utf-8') as f:
         json.dump(file_data, f, ensure_ascii=False, indent=4)
 
+    logger.info(f"files.json updated with {len(file_data)} entries.")
+
 # Основная логика
 if __name__ == "__main__":
     lines = fetch_data(url)
@@ -138,5 +147,5 @@ if __name__ == "__main__":
     # Обновляем информацию о файлах в files.json
     update_files_info(data_dir, files_info_file)
 
-    print(f"Данные успешно сохранены в файл {today_json_file}")
-    print(f"db.json и files.json обновлены.")
+    logger.success(f"Данные успешно сохранены в файл {today_json_file}")
+    logger.success(f"db.json и files.json обновлены.")
