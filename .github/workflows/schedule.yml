@@ -15,9 +15,7 @@ jobs:
 
     steps:
       - name: Clone repository
-        run: |
-          git clone https://github.com/${{ github.repository }} repo
-          cd repo
+        run: git clone https://github.com/${{ github.repository }} repo
 
       - name: Set up Python
         run: |
@@ -26,14 +24,15 @@ jobs:
           python3 -m pip install --upgrade pip
 
       - name: Install dependencies
-        run: |
-          pip3 install requests
+        working-directory: ./repo
+        run: pip3 install requests
 
       - name: Run Python script
-        run: |
-          python3 main.py
+        working-directory: ./repo
+        run: python3 main.py
 
       - name: Commit report
+        working-directory: ./repo
         run: |
           git config --global user.name 'atageldi194229'
           git config --global user.email 'atageldi194229@gmail.com'
