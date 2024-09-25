@@ -104,7 +104,7 @@ def update_db(ip_port_list, db_file):
     with open(db_file, 'w', encoding='utf-8') as f:
         json.dump(updated_data, f, ensure_ascii=False)
 
-# Обновление файла files.json с информацией о файлах
+# Обновление файла files.json с информацией о файлах, сортировка по дате от старой к новой
 def update_files_info(data_dir, files_info_file):
     logger.info(f"Updating files info in {files_info_file}")
     file_data = []
@@ -118,13 +118,28 @@ def update_files_info(data_dir, files_info_file):
             unique_ips = len(set([entry['key'] for entry in file_content]))
             # Размер файла в байтах
             byte_size = os.path.getsize(file_path)
+            # Получение даты создания файла
+            creation_time = os.path.getctime(file_path)
 
             file_data.append({
                 "name": file_name,
                 "sstpCount": unique_ips,
-                "byteSize": byte_size
+                "byteSize": byte_size,
+                "creationTime": creation_time  # Добавляем время создания файла
             })
 
+    # Сортируем данные по дате создания (от старого к новому)
+    file_data.sort(key=lambda x: x['creationTime'])
+
+    # Удаляем поле "creationTime" перед сохранением, если оно не нужно
+    for file_entry in file_data:
+        del file_entry['creationTime']
+
+    # Сохраняем обновлённую информацию о файлах
+    with open(files_info_file, 'w', encoding='utf-8') as f:
+        json.dump(file_data, f, ensure_ascii=False, indent=4)
+
+    logger.info(f"files.json updated with {len(file_data)} entries.")
     # Сохраняем обновлённую информацию о файлах
     with open(files_info_file, 'w', encoding='utf-8') as f:
         json.dump(file_data, f, ensure_ascii=False)
