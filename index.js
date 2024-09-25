@@ -69,7 +69,7 @@ async function fetchData(url) {
 
 function saveDataToJson(data, filePath) {
     console.info(`Saving data to file: ${filePath}`);
-    fs.writeFileSync(filePath, JSON.stringify(data, null, 4), 'utf-8');
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 0), 'utf-8');
 }
 
 
@@ -81,7 +81,7 @@ function updateDb(ipPortList, dbFile) {
 
     const updatedData = Array.from(new Set([...existingData, ...ipPortList]));
     console.info(`Updated db.json with ${updatedData.length} unique entries (removed duplicates).`);
-    fs.writeFileSync(dbFile, JSON.stringify(updatedData, null, 4), 'utf-8');
+    fs.writeFileSync(dbFile, JSON.stringify(updatedData, null, 0), 'utf-8');
 }
 
  
@@ -111,7 +111,7 @@ function updateFilesInfo(dataDir, filesInfoFile) {
     fileData.forEach(entry => delete entry.creationTime);
 
     
-    fs.writeFileSync(filesInfoFile, JSON.stringify(fileData, null, 4), 'utf-8');
+    fs.writeFileSync(filesInfoFile, JSON.stringify(fileData, null, 0), 'utf-8');
     console.info(`files.json updated with ${fileData.length} entries.`);
 }
 
