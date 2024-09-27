@@ -20,32 +20,32 @@ const dbFile = path.join(dataDir, "db.json");
 const filesInfoFile = path.join(dataDir, "files.json");
 
 
-const pattern = /(?:↑)?(?<id>\d+)•(?<sessions>\d+) SESSIONS.*?USERS•(?<location_info>.*?)•(?<hostname>[A-Z0-9-]+\.OPENGW\.NET)(?::(?<port>[0-9]+))?•(?<country_info>.+?)•(?<ip>[0-9.]+)(?:↓)?/;
-
+// Регулярное выражение для двух форматов
+const pattern = /(?:↑)?(?<id>\d+)•(?<sessions>\d+) SESSIONS.*?(?:USERS)?•(?<location_info>.*?)•(?<hostname>[A-Z0-9-]+\.OPENGW\.NET)(?::(?<port>[0-9]+))?•(?<country_info>.+?)•(?<ip>[0-9.]+)(?:↓)?|(?:↑)?(?<id_alt>\d+)•(?<sessions_alt>\d+) SESSIONS.*?•(?<location_info_alt>.*?)•(?<hostname_alt>[A-Z0-9-]+\.OPENGW\.NET)(?::(?<port_alt>[0-9]+))?•(?<country_info_alt>.+?)•(?<ip_alt>[0-9.]+)(?:↓)?/;
 
 function parseLine(line) {
     const match = pattern.exec(line);
     if (match) {
         const { ip, port = 443, hostname, location_info, country_info, id, sessions } = match.groups;
-        const locationParts = location_info.split(" ");
-        const countryParts = country_info.split("~");
+        const locationParts = location_info ? location_info.split(" ") : match.groups.location_info_alt.split(" ");
+        const countryParts = country_info ? country_info.split("~") : match.groups.country_info_alt.split("~");
         const shortCountry = countryParts[0].trim().split("-")[0];
         const countryName = countryParts[0].split("-")[1]?.trim() || "";
         const locationName = countryParts[1]?.trim() || "";
 
         return {
-            hostname,
-            ip,
-            port: parseInt(port, 10),
-            info: `${sessions} SESSIONS ${locationParts.slice(1).join(" ")}`,
-            info2: location_info,
+            hostname: hostname || match.groups.hostname_alt,
+            ip: ip || match.groups.ip_alt,
+            port: parseInt(port || match.groups.port_alt || 443, 10),
+            info: `${sessions || match.groups.sessions_alt} SESSIONS ${locationParts.slice(1).join(" ")}`,
+            info2: location_info || match.groups.location_info_alt,
             location: {
                 country: countryName,
                 short: shortCountry,
                 name: locationName
             },
-            id,
-            key: `${ip}:${port}`
+            id: id || match.groups.id_alt,
+            key: `${ip || match.groups.ip_alt}:${port || match.groups.port_alt || 443}`
         };
     } else {
         console.debug(`Line did not match: ${line}`);
@@ -53,7 +53,7 @@ function parseLine(line) {
     }
 }
 
-
+// Функция для получения данных
 async function fetchData(url) {
     try {
         console.info(`Fetching data from URL: ${url}`);
@@ -69,7 +69,7 @@ async function fetchData(url) {
 
 function saveDataToJson(data, filePath) {
     console.info(`Saving data to file: ${filePath}`);
-    fs.writeFileSync(filePath, JSON.stringify(data, null, 0), 'utf-8');
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 4), 'utf-8');
 }
 
 
@@ -81,10 +81,10 @@ function updateDb(ipPortList, dbFile) {
 
     const updatedData = Array.from(new Set([...existingData, ...ipPortList]));
     console.info(`Updated db.json with ${updatedData.length} unique entries (removed duplicates).`);
-    fs.writeFileSync(dbFile, JSON.stringify(updatedData, null, 0), 'utf-8');
+    fs.writeFileSync(dbFile, JSON.stringify(updatedData, null, 4), 'utf-8');
 }
 
- 
+
 function updateFilesInfo(dataDir, filesInfoFile) {
     console.info(`Updating files info in ${filesInfoFile}`);
     const fileData = [];
@@ -106,15 +106,13 @@ function updateFilesInfo(dataDir, filesInfoFile) {
         }
     });
 
-    
+
     fileData.sort((a, b) => a.creationTime - b.creationTime);
     fileData.forEach(entry => delete entry.creationTime);
 
-    
-    fs.writeFileSync(filesInfoFile, JSON.stringify(fileData, null, 0), 'utf-8');
+    fs.writeFileSync(filesInfoFile, JSON.stringify(fileData, null, 4), 'utf-8');
     console.info(`files.json updated with ${fileData.length} entries.`);
 }
-
 
 (async function main() {
     const lines = await fetchData(url);
@@ -123,16 +121,15 @@ function updateFilesInfo(dataDir, filesInfoFile) {
         .map(line => parseLine(line))
         .filter(data => data !== null);
 
-    // Сохраняем данные в файл за сегодня
+
     saveDataToJson(parsedData, todayJsonFile);
 
-    
     const ipPortList = parsedData.map(entry => entry.key);
     updateDb(ipPortList, dbFile);
 
-    
+
     updateFilesInfo(dataDir, filesInfoFile);
 
-    console.log(`succesful scan, file: ${todayJsonFile}`);
-    console.log(`database and files updated`);
+    console.log(`Данные успешно сохранены в файл ${todayJsonFile}`);
+    console.log(`db.json и files.json обновлены.`);
 })();
