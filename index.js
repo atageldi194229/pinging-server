@@ -20,7 +20,7 @@ const dbFile = path.join(dataDir, "db.json");
 const filesInfoFile = path.join(dataDir, "files.json");
 
 
-// Регулярное выражение для двух форматов
+
 const pattern = /(?:↑)?(?<id>\d+)•(?<sessions>\d+) SESSIONS.*?(?:USERS)?•(?<location_info>.*?)•(?<hostname>[A-Z0-9-]+\.OPENGW\.NET)(?::(?<port>[0-9]+))?•(?<country_info>.+?)•(?<ip>[0-9.]+)(?:↓)?|(?:↑)?(?<id_alt>\d+)•(?<sessions_alt>\d+) SESSIONS.*?•(?<location_info_alt>.*?)•(?<hostname_alt>[A-Z0-9-]+\.OPENGW\.NET)(?::(?<port_alt>[0-9]+))?•(?<country_info_alt>.+?)•(?<ip_alt>[0-9.]+)(?:↓)?/;
 
 function parseLine(line) {
@@ -53,7 +53,7 @@ function parseLine(line) {
     }
 }
 
-// Функция для получения данных
+
 async function fetchData(url) {
     try {
         console.info(`Fetching data from URL: ${url}`);
@@ -69,7 +69,7 @@ async function fetchData(url) {
 
 function saveDataToJson(data, filePath) {
     console.info(`Saving data to file: ${filePath}`);
-    fs.writeFileSync(filePath, JSON.stringify(data, null, 4), 'utf-8');
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 0), 'utf-8');
 }
 
 
@@ -81,7 +81,7 @@ function updateDb(ipPortList, dbFile) {
 
     const updatedData = Array.from(new Set([...existingData, ...ipPortList]));
     console.info(`Updated db.json with ${updatedData.length} unique entries (removed duplicates).`);
-    fs.writeFileSync(dbFile, JSON.stringify(updatedData, null, 4), 'utf-8');
+    fs.writeFileSync(dbFile, JSON.stringify(updatedData, null, 0), 'utf-8');
 }
 
 
@@ -110,7 +110,7 @@ function updateFilesInfo(dataDir, filesInfoFile) {
     fileData.sort((a, b) => a.creationTime - b.creationTime);
     fileData.forEach(entry => delete entry.creationTime);
 
-    fs.writeFileSync(filesInfoFile, JSON.stringify(fileData, null, 4), 'utf-8');
+    fs.writeFileSync(filesInfoFile, JSON.stringify(fileData, null, 0), 'utf-8');
     console.info(`files.json updated with ${fileData.length} entries.`);
 }
 
@@ -130,6 +130,6 @@ function updateFilesInfo(dataDir, filesInfoFile) {
 
     updateFilesInfo(dataDir, filesInfoFile);
 
-    console.log(`Данные успешно сохранены в файл ${todayJsonFile}`);
-    console.log(`db.json и files.json обновлены.`);
+    console.log(`today json file saved: ${todayJsonFile}`);
+    console.log(`success, db updated`);
 })();
