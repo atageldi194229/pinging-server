@@ -1,131 +1,135 @@
-const fs = require("fs");
-const path = require("path");
-const axios = require("axios");
+const axios = require('axios');
+const fs = require('fs');
+const path = require('path');
 
-const today = new Date().toISOString().substring(0, 10);
-const url2 = process.env.URL2 || "https://giamping.com/repository/vpnrequestmobile.php?message=MBVRvEzBAVRWJST8NhVTRCAKbh2gO2ztsF5pwbdVfjd1UaqvsdTg9K122p1JxkuXgILF5npSo48jFf9ZAPnSe2rIRxq3QCGClEu21YSWLU6F3Nvf0XMJ2LU34sHuKa8go0DN0vHaf2OEFYNrhcXcGpozFezCj8OlN8cPzPrnIsLLMzBeTcglmF0jFS9gZZQipqU/3pbsftSRlUY1j5/BMpGPVPNhWMxE4m71qx7Ryfy5j967hXwjrP7dhrH63izHZyhbQIGPVPNXQXB1nf70ftqAgVEQNw==";
 
-const dir = path.join(__dirname, "data");
-const hostListFile = path.join(dir, "db.json");
-const todayJsonFile = path.join(dir, today + ".json");
-const fileListPath = path.join(dir, "files.json");
+const url = process.env.URL2 || "https://giamping.com/repository/vpnrequestmobile.php?message=MBVRvEzBAVRWJST8NhVTRCAKbh2gO2ztsF5pwbdVfjd1UaqvsdTg9K122p1JxkuXgILF5npSo48jFf9ZAPnSe2rIRxq3QCGClEu21YSWLU6F3Nvf0XMJ2LU34sHuKa8go0DN0vHaf2OEFYNrhcXcGpozFezCj8OlN8cPzPrnIsLLMzBeTcglmF0jFS9gZZQipqU/3pbsftSRlUY1j5/BMpGPVPNhWMxE4m71qx7Ryfy5j967hXwjrP7dhrH63izHZyhbQIGPVPNXQXB1nf70ftqAgVEQNw==";
 
-const getHost = (e) => `${e.ip}:${e.port}`;
 
-const readFile = (file, defaultValue) => {
-  return fs.existsSync(file) ? require(file) : defaultValue;
-};
+const today = new Date().toISOString().split('T')[0];
 
-const writeHostsToFiles = (data) => {
-  data = data.filter((e) => !getHost(e).includes("undefined"));
-  let dbHosts = readFile(hostListFile, []);
-  let newHosts = data.filter((e) => !dbHosts.includes(getHost(e)));
 
-  let result = [...dbHosts, ...newHosts.map(getHost)];
-  result = result.filter((e) => !e.includes("undefined"));
-
-  fs.writeFileSync(hostListFile, JSON.stringify(result));
-
-  // add new hosts to todays file
-  let all = readFile(todayJsonFile, []);
-  fs.writeFileSync(todayJsonFile, JSON.stringify([...all, ...newHosts]));
-
-  let files = fs
-    .readdirSync(dir)
-    .filter((s = "") => {
-      const extension = ".json";
-
-      if (!s.endsWith(extension)) return false;
-
-      s = s.substring(0, s.length - extension.length);
-
-      return s.split("-").every((e) => !Number.isNaN(Number(e)));
-    })
-    .map((name) => {
-      const filePath = path.join(dir, name);
-      const sstpCount = require(filePath).length;
-      const byteSize = fs.statSync(filePath).size;
-
-      return {
-        name,
-        sstpCount,
-        byteSize,
-      };
-    });
-
-  fs.writeFileSync(fileListPath, JSON.stringify(files));
-};
-
-const fetchData2 = () => {
-  console.log("url2:", url2); // Debug the URL
-
-  if (!url2) {
-    console.error("url2 is not defined");
-    process.exit(1);
-  }
-
-  return axios
-    .get(url2)
-    .then((res) => {
-      if (res.status !== 200) {
-        throw new Error(`Unexpected status code: ${res.status}`);
-      }
-
-      if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
-      }
-
-      // Check if data is an array, if not, wrap it in an array
-      const data = Array.isArray(res.data) ? res.data : [res.data];
-
-      // Validate each entry in data
-      data.forEach((entry, index) => {
-        if (!entry || typeof entry.ip !== "string" || typeof entry.port !== "number") {
-          console.warn(`Invalid entry at index ${index}:`, entry);
-        }
-      });
-
-      writeHostsToFiles(data); // Pass the data to writeHostsToFiles
-    })
-    .catch((error) => {
-      console.error("Error fetching data:", error);
-    });
-};
-
-try {
-  console.log("Started to fetch data 2...");
-  fetchData2();
-  console.log("Completed fetching data 2 successfully");
-} catch (e) {
-  console.error("Error occurred:", e);
+const dataDir = path.join(process.cwd(), "data");
+if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir);
 }
 
-// const fetchData = () => {
-//   const URL = process.env.URL;
 
-//   console.log("URL:", URL);
+const todayJsonFile = path.join(dataDir, `${today}.json`);
+const dbFile = path.join(dataDir, "db.json");
+const filesInfoFile = path.join(dataDir, "files.json");
 
-//   if (!URL) {
-//     console.error("URL is not defined");
-//     process.exit(1);
-//   }
 
-//   return axios.get(URL).then((res) => {
-//     if (res.status !== 200) return;
 
-//     if (!fs.existsSync(dir)) {
-//       fs.mkdirSync(dir, { recursive: true });
-//     }
+const pattern = /(?:↑)?(?<id>\d+)•(?<sessions>\d+) SESSIONS.*?(?:USERS)?•(?<location_info>.*?)•(?<hostname>[A-Z0-9-]+\.OPENGW\.NET)(?::(?<port>[0-9]+))?•(?<country_info>.+?)•(?<ip>[0-9.]+)(?:↓)?|(?:↑)?(?<id_alt>\d+)•(?<sessions_alt>\d+) SESSIONS.*?•(?<location_info_alt>.*?)•(?<hostname_alt>[A-Z0-9-]+\.OPENGW\.NET)(?::(?<port_alt>[0-9]+))?•(?<country_info_alt>.+?)•(?<ip_alt>[0-9.]+)(?:↓)?/;
 
-//     writeHostsToFiles(res.data);
-//   });
-// };
+function parseLine(line) {
+    const match = pattern.exec(line);
+    if (match) {
+        const { ip, port = 443, hostname, location_info, country_info, id, sessions } = match.groups;
+        const locationParts = location_info ? location_info.split(" ") : match.groups.location_info_alt.split(" ");
+        const countryParts = country_info ? country_info.split("~") : match.groups.country_info_alt.split("~");
+        const shortCountry = countryParts[0].trim().split("-")[0];
+        const countryName = countryParts[0].split("-")[1]?.trim() || "";
+        const locationName = countryParts[1]?.trim() || "";
 
-// try {
-//   console.log("started to fetch data...");
-//   fetchData();
-//   console.log("completed fetching data successfully");
-// } catch (e) {
-//   console.log("completed fetching data with error");
-//   console.error(e);
-// }
+        return {
+            hostname: hostname || match.groups.hostname_alt,
+            ip: ip || match.groups.ip_alt,
+            port: parseInt(port || match.groups.port_alt || 443, 10),
+            info: `${sessions || match.groups.sessions_alt} SESSIONS ${locationParts.slice(1).join(" ")}`,
+            info2: location_info || match.groups.location_info_alt,
+            location: {
+                country: countryName,
+                short: shortCountry,
+                name: locationName
+            },
+            id: id || match.groups.id_alt,
+            key: `${ip || match.groups.ip_alt}:${port || match.groups.port_alt || 443}`
+        };
+    } else {
+        console.debug(`Line did not match: ${line}`);
+        return null;
+    }
+}
+
+
+async function fetchData(url) {
+    try {
+        console.info(`Fetching data from URL: ${url}`);
+        const response = await axios.get(url);
+        console.debug(`Fetched data: ${response.data.slice(0, 500)}...`);
+        return response.data.split('\n');
+    } catch (error) {
+        console.error(`Error fetching data: ${error.response?.status}`);
+        return [];
+    }
+}
+
+
+function saveDataToJson(data, filePath) {
+    console.info(`Saving data to file: ${filePath}`);
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 0), 'utf-8');
+}
+
+
+function updateDb(ipPortList, dbFile) {
+    let existingData = [];
+    if (fs.existsSync(dbFile)) {
+        existingData = JSON.parse(fs.readFileSync(dbFile, 'utf-8'));
+    }
+
+    const updatedData = Array.from(new Set([...existingData, ...ipPortList]));
+    console.info(`Updated db.json with ${updatedData.length} unique entries (removed duplicates).`);
+    fs.writeFileSync(dbFile, JSON.stringify(updatedData, null, 0), 'utf-8');
+}
+
+
+function updateFilesInfo(dataDir, filesInfoFile) {
+    console.info(`Updating files info in ${filesInfoFile}`);
+    const fileData = [];
+
+    fs.readdirSync(dataDir).forEach(fileName => {
+        if (fileName.endsWith(".json") && fileName !== "db.json" && fileName !== "files.json") {
+            const filePath = path.join(dataDir, fileName);
+            const fileContent = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+            const uniqueIps = new Set(fileContent.map(entry => entry.key)).size;
+            const byteSize = fs.statSync(filePath).size;
+            const creationTime = fs.statSync(filePath).ctimeMs;
+
+            fileData.push({
+                name: fileName,
+                sstpCount: uniqueIps,
+                byteSize,
+                creationTime
+            });
+        }
+    });
+
+
+    fileData.sort((a, b) => a.creationTime - b.creationTime);
+    fileData.forEach(entry => delete entry.creationTime);
+
+    fs.writeFileSync(filesInfoFile, JSON.stringify(fileData, null, 0), 'utf-8');
+    console.info(`files.json updated with ${fileData.length} entries.`);
+}
+
+(async function main() {
+    const lines = await fetchData(url);
+    const parsedData = lines
+        .filter(line => line.includes("SESSIONS"))
+        .map(line => parseLine(line))
+        .filter(data => data !== null);
+
+
+    saveDataToJson(parsedData, todayJsonFile);
+
+    const ipPortList = parsedData.map(entry => entry.key);
+    updateDb(ipPortList, dbFile);
+
+
+    updateFilesInfo(dataDir, filesInfoFile);
+
+    console.log(`today json file saved: ${todayJsonFile}`);
+    console.log(`success, db updated`);
+})();
