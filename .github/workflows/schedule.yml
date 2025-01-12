@@ -24,6 +24,8 @@ jobs:
 
       - name: Run node file
         run: npm run build --if-present
+        env: 
+          URL2: ${{ secrets.URL2 }}
 
       - name: Sleep for a few seconds
         run: sleep 10s
@@ -37,5 +39,3 @@ jobs:
           git add -A
           git commit -m "Automated data update" || echo "No changes to commit"
           git push || echo "No changes to push"
-        env: 
-          URL2: ${{ secrets.URL2 }}
