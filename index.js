@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 
-const url = process.env.URL2 || "https://giamping.com/repository/vpnrequestmobile.php?message=p4Saxr7DnSGpZORqugcgfc6566ik4cxSBsvBqZx8jPC9ksdDeUIOJ2qM/2zNbzCMGPVPNIz0Y955MjeGc6f9BNRShC6M1oOrr8jkX8f99ZCCTc41wLM9R9QrHG00vGwQmPbmvqPWNQOUpiulaNIOrMAVnKHwNUjMtGPVPNWEaxnUDwd9NpQ2IOnhGYGUshK9FTDT/6nB";
+const url = process.env.URL2;
 
 
 const today = new Date().toISOString().split('T')[0];
